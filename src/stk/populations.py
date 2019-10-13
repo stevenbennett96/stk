@@ -1028,7 +1028,10 @@ class Population:
         # Update the structures in the population.
         for input_mol, result in zip(to_evaluate, evaluated):
             if isinstance(result, Exception):
-                raise result
+                try:
+                    raise result
+                except result:
+                    logger.error(result)
 
             output_mol, _ = result
             input_mol.set_position_matrix(
