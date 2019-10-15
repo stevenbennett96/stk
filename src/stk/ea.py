@@ -9,7 +9,6 @@ import stk
 import psutil
 import shutil
 from importlib.machinery import SourceFileLoader
-import json
 
 
 warnings.filterwarnings("ignore")
@@ -197,7 +196,6 @@ class EAHistory:
         mols = '\n'.join(
             self.pop_log_content(sorted_pop, u, fitness_values)
         )
-
         s = (
             f'Population log:\n\n'
             f'{u}\n'
@@ -392,7 +390,7 @@ def ea_run(filename, input_file):
 
             if debug_dumps:
                 pop.dump(
-                    join('..', 'pop_dumps', f'gen_{x}_unselected.json'),
+                    join('..', 'pop_dumps', f'gen_{x}_unselected.json')
                 )
 
             logger.info('Optimizing the population.')
