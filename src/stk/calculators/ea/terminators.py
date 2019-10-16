@@ -283,19 +283,21 @@ class FitnessPlateau(Terminator):
         # Check that the EA has run for more than num_gens generations.
         if len(progress.subpopulations) >= self._num_generations:
             gens = set()
-            for subpop in progress.subpopulations:
-                fitness_values = subpop.get_fitness_values()
-                sorted_fitness = OrderedDict(
+            for i in range(self._num_generations):
+                gen = OrderedDict(
                     sorted(
-                        fitness_values.items(),
-                        key=lambda mol: mol[1]
-                        )
+                        progress.subpopulations[-i-1]
+                        .get_fitness_values()
+                        .items(),
+                        reverse=True,
+                        key=lambda mol: mol[1],
                     )
-                # Get the top members of the generaton
+                )
+                # Get the top members of the generaton.
                 keys = frozenset(
                     mol.get_identity_key()
                     for mol in list(
-                        sorted_fitness.keys()
+                        gen.keys()
                         )[:self._top_members]
                 )
                 gens.add(keys)
@@ -304,5 +306,5 @@ class FitnessPlateau(Terminator):
                 return True
             else:
                 return False
- 
+
         return False
