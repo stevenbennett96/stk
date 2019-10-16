@@ -57,22 +57,23 @@ def test_fitness_plateau():
         for i in range(5*10)
     ]
 
-    pop = stk.Population(
-        *(stk.Population(*bbs[i:i+5]) for i in range(0, len(bbs), 5))
+    pop = stk.EAPopulation(
+        *(stk.EAPopulation(*bbs[i:i+5]) for i in range(0, len(bbs), 5))
     )
 
+    pop._fitness_values = {}
     for i, mol in enumerate(pop):
-        mol.fitness = i
+        pop._fitness_values.update(mol=i)
+        mol._fitness_values = {mol: i}
         mol._identity_key = i
 
     terminator = stk.FitnessPlateau(2)
 
     assert not terminator.terminate(pop)
 
-    for mol in pop:
-        mol.fitness = 2
     assert not terminator.terminate(pop)
 
-    pop2 = stk.Population(*pop)
-    pop3 = stk.Population(pop2, pop2)
+    pop2 = stk.EAPopulation(*pop)
+
+    pop3 = stk.EAPopulation(pop2, pop2)
     assert terminator.terminate(pop3)
