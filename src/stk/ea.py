@@ -204,6 +204,10 @@ class EAHistory:
             f'{u}\n'
             f'{mols}'
         )
+
+        with open('fitness.log', 'a') as f:
+            f.write(s)
+        
         logger.info(s)
 
     def pop_log_content(self, pop, underline, fitness_values):
