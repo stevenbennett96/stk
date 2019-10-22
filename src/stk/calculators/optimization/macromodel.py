@@ -437,7 +437,7 @@ class _MacroModel(_MoleculeCalculator, Optimizer):
                 logger.warning(f'Waiting for "{path}".')
                 tick += 1
 
-            if os.path.exists(path) or time_taken > timeout:
+            if os.path.exists(path):
                 break
 
     def _convert_maegz_to_mae(self, run_name):
