@@ -429,16 +429,16 @@ class _MacroModel(_MoleculeCalculator, Optimizer):
 
         """
 
-        t_start = time.time()
-        tick = 0
+        # t_start = time.time()
+        # tick = 0
         while True:
-            time_taken = time.time() - t_start
-            if divmod(time_taken, 5)[0] == tick + 1:
-                logger.warning(f'Waiting for "{path}".')
-                tick += 1
-
+            # time_taken = time.time() - t_start
+            # if divmod(time_taken, 100)[0] == tick + 1:
+            #     logger.warning(f'Waiting for "{path}".')
+            #     tick += 1
             if os.path.exists(path):
                 break
+            time.sleep(5.0)
 
     def _convert_maegz_to_mae(self, run_name):
         """
