@@ -419,7 +419,10 @@ def ea_run(filename, input_file):
             progress.add_subpopulation(pop)
 
             if generation_dumps:
-                pop.dump(f'generation_{gen}.json')
+                pop.dump(
+                    f'generation_{gen}.json',
+                    include_attrs=dump_attrs,
+                )
 
             if debug_dumps:
                 progress.dump(progress_dump_filename)
