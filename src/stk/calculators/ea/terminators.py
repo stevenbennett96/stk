@@ -31,6 +31,7 @@ generation as a subpopulation.
 
 import rdkit.Chem.AllChem as rdkit
 from functools import partial
+from collections import OrderedDict
 
 
 class Terminator:
@@ -283,14 +284,21 @@ class FitnessPlateau(Terminator):
         if len(progress.subpopulations) >= self._num_generations:
             gens = set()
             for i in range(self._num_generations):
-                gen = sorted(
-                    progress.subpopulations[-i-1],
-                    reverse=True,
-                    key=lambda mol: mol.fitness
+                gen = OrderedDict(
+                    sorted(
+                        progress.subpopulations[-i-1]
+                        .get_fitness_values()
+                        .items(),
+                        reverse=True,
+                        key=lambda mol: mol[1],
+                    )
                 )
-                # Get the top members of the generation.
+                # Get the top members of the generaton.
                 keys = frozenset(
-                    mol.get_identity_key() for mol in gen[:self._top_members]
+                    mol.get_identity_key()
+                    for mol in list(
+                        gen.keys()
+                        )[:self._top_members]
                 )
                 gens.add(keys)
             unique_gens = len(gens)
