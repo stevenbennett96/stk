@@ -171,8 +171,7 @@ class Reactor:
         _ReactionKey('nitrile', 'aldehyde'): 2,
         _ReactionKey('amide', 'amine'): 2,
         _ReactionKey('terminal_alkene', 'terminal_alkene'): 2,
-        _ReactionKey('alkyne2', 'alkyne2'): 3,
-        _ReactionKey('primary_amine', 'aldehyde'): 2,
+        _ReactionKey('alkyne2', 'alkyne2'): 3
     }
 
     def __init__(self, mol):
