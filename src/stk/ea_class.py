@@ -223,7 +223,7 @@ class EvolutionaryAlgorithm:
     """
 
     def __init__(self):
-        ...
+        logger.info('EA not initialized.')
 
     def init_from_file(self, path):
         # Load the input file as a module.
@@ -301,6 +301,8 @@ class EvolutionaryAlgorithm:
         self.fitness_calculator.set_cache_use(True)
         self.crosser.set_cache_use(True)
         self.mutator.set_cache_use(True)
+
+        logger.info('EA initialized.')
 
     def run_ea(self, filename):
         # Set up the directory structure.
@@ -461,20 +463,20 @@ class EvolutionaryAlgorithm:
                     progress.dump(self.progress_dump_filename)
                     history.db_pop.dump(self.database_dump_filename)
 
-                stk.kill_macromodel()
+        stk.kill_macromodel()
 
-                history.dump()
+        history.dump()
 
-                for plotter in self.plotters:
-                    plotter.plot(progress)
+        for plotter in self.plotters:
+            plotter.plot(progress)
 
-                os.chdir(root_dir)
-                os.rename('scratch/errors.log', 'errors.log')
+        os.chdir(root_dir)
+        os.rename('scratch/errors.log', 'errors.log')
 
-                self.pop.write('final_pop')
-                os.chdir(launch_dir)
-                if self.tar_output:
-                    logger.info('Compressing output.')
-                    stk.tar_output()
-                stk.archive_output()
-                logger.info('Successful exit.')
+        self.pop.write('final_pop')
+        os.chdir(launch_dir)
+        if self.tar_output:
+            logger.info('Compressing output.')
+            stk.tar_output()
+        stk.archive_output()
+        logger.info('Successful exit.')
