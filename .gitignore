@@ -11,3 +11,4 @@ src/stk.egg-info
 **/tests_output
 docs/build
 tests/failures.txt
+experimental
