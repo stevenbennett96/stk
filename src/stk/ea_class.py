@@ -304,6 +304,74 @@ class EvolutionaryAlgorithm:
 
         logger.info('EA initialized.')
 
+    def init_from_dict(self, settings_dict):
+        '''Initialises the EA settings from a dictionary.'''
+
+        self.pop = settings_dict['population']
+        self.optimizer = settings_dict['optimizer']
+        self.fitness_calculator = settings_dict['fitness_calculator']
+        self.crosser = settings_dict['crosser']
+        self.mutator = settings_dict['mutator']
+        self.generation_selector = settings_dict['generation_selector']
+        self.mutation_selector = settings_dict['mutation_selector']
+        self.crossover_selector = settings_dict['crossover_selector']
+        self.terminator = settings_dict['terminator']
+
+        self.progress_dump_filename = join(
+            '..',
+            'pop_dumps',
+            'progress.json'
+        )
+        self.database_dump_filename = join(
+            '..',
+            'pop_dumps',
+            'progress.json'
+        )
+
+        self.fitness_normalizer = stk.NullFitnessNormalizer()
+        if 'fitness_normalizer' in settings_dict:
+            self.fitness_normalizer = settings_dict['normalizer']
+
+        self.num_processes = psutil.cpu_count()
+        if 'num_processes' in settings_dict:
+            self.num_processes = settings_dict['num_processes']
+
+        self.plotters = []
+        if 'plotters' in settings_dict:
+            self.plotters = settings_dict['plotters']
+
+        self.log_file = True
+        if 'log_file' in settings_dict:
+            self.log_file = settings_dict['log_file']
+
+        self.database_dump = True
+        if 'database_dump' in settings_dict:
+            self.database_dump = settings_dict['database_dump']
+
+        self.progress_dump = True
+        if 'progress_dump' in settings_dict:
+            self.progress_dump = settings_dict['progress_dump']
+
+        self.dump_attrs = None
+        if 'dump_attrs' in settings_dict:
+            self.dump_attrs = settings_dict['dump_attrs']
+
+        self.debug_dumps = False
+        if 'debug_dumps' in settings_dict:
+            self.debug_dumps = settings_dict['debug_dumps']
+
+        self.generation_dumps = True
+        if 'generation_dumps' in settings_dict:
+            self.generation_dumps = settings_dict['generation_dumps']
+
+        self.tar_output = False
+        if 'tar_output' in settings_dict:
+            self.tar_output = settings_dict['tar_output']
+
+        logging_level = logging.INFO
+        if 'logging_level' in settings_dict:
+            logging_level = settings_dict['logging_level']
+
     def run_ea(self, filename):
         # Set up the directory structure.
 
