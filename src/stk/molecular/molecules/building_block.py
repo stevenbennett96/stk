@@ -380,6 +380,8 @@ class BuildingBlock(Molecule):
             return cls._cache[key]
 
         bb = cls.__new__(cls)
+        # Ensure hydrogens have been added to the molecule.
+        mol = rdkit.AddHs(mol)
         cls._init_from_rdkit_mol(
             self=bb,
             mol=mol,
