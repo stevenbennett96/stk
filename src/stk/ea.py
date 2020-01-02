@@ -204,6 +204,10 @@ class EAHistory:
             f'{u}\n'
             f'{mols}'
         )
+
+        with open('fitness.log', 'a') as f:
+            f.write(s)
+        
         logger.info(s)
 
     def pop_log_content(self, pop, underline, fitness_values):
@@ -415,7 +419,10 @@ def ea_run(filename, input_file):
             progress.add_subpopulation(pop)
 
             if generation_dumps:
-                pop.dump(f'generation_{gen}.json')
+                pop.dump(
+                    f'generation_{gen}.json',
+                    include_attrs=dump_attrs,
+                )
 
             if debug_dumps:
                 progress.dump(progress_dump_filename)
