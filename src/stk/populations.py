@@ -400,6 +400,9 @@ class Population:
         """
 
         clone = self.__class__(*self.direct_members)
+        # Set fitness attributes of cloned population.
+        if self._fitness_values:
+            clone.set_fitness_values_from_dict(self._fitness_values)
         clone.subpopulations = [
             pop.clone() for pop in self.subpopulations
         ]
