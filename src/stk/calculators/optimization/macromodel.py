@@ -283,7 +283,7 @@ class _MacroModel(_MoleculeCalculator, Optimizer):
             if time.time() - start > 600:
                 break
 
-    def _license_found(self, run_name, output, mol=None):
+    def _license_found(self, run_name, output, mol=None, timeout=60):
         """
         Check to see if minimization failed due to a missing license.
 
@@ -307,6 +307,10 @@ class _MacroModel(_MoleculeCalculator, Optimizer):
             The molecule being optimized. If the ``.log`` file is not
             to be checked, the default ``None`` should be used.
 
+        timeout : :class:`int`, optional
+            The number of seconds for the log file to be
+            populated before timing out. 
+
         Returns
         -------
         :class:`bool`
@@ -320,8 +324,18 @@ class _MacroModel(_MoleculeCalculator, Optimizer):
         if mol is None:
             return True
 
+        # Check if the log file is empty.
+        # If it is empty, the calculation has most likely failed and
+        # will need to be re-run.
+        timeout = time.time() + timeout
+        while True:
+            if os.path.getsize(f'{run_name}.log'):
+                break
+            elif time.time() > timeout:
+                return False
+
         # To check if the log file mentions a missing license file open
-        # the log file and scan for the apporpriate string.
+        # the log file and scan for the appropriate string.
 
         # Check if the file exists first. If not, this is often means
         # the calculation must be redone so return False anyway.
@@ -429,16 +443,16 @@ class _MacroModel(_MoleculeCalculator, Optimizer):
 
         """
 
-        t_start = time.time()
-        tick = 0
+        # t_start = time.time()
+        # tick = 0
         while True:
-            time_taken = time.time() - t_start
-            if divmod(time_taken, 5)[0] == tick + 1:
-                logger.warning(f'Waiting for "{path}".')
-                tick += 1
-
-            if os.path.exists(path) or time_taken > timeout:
+            # time_taken = time.time() - t_start
+            # if divmod(time_taken, 100)[0] == tick + 1:
+            #     logger.warning(f'Waiting for "{path}".')
+            #     tick += 1
+            if os.path.exists(path):
                 break
+            time.sleep(5.0)
 
     def _convert_maegz_to_mae(self, run_name):
         """
@@ -465,7 +479,7 @@ class _MacroModel(_MoleculeCalculator, Optimizer):
         """
         Fix bond distances and angles in ``.com`` file.
 
-        For each bond distance, bond angle and torisional angle that
+        For each bond distance, bond angle and torsional angle that
         does not involve a bond created by
         :meth:`~.Topology.construct`, a "FX" command is added to the
         body of the ``.com`` file.
@@ -752,7 +766,7 @@ class MacroModelForceField(_MacroModel):
 
         # Go through all the bonds in the rdkit molecule. If the bond
         # is not between bonder atoms add a fix line to the
-        # ``fix_block``. If the bond does invovle two bonder atoms go
+        # ``fix_block``. If the bond does involve two bonder atoms go
         # to the next bond. This is because a bond between 2 bonder
         # atoms was added during construction and should therefore not
         # be fixed.
@@ -908,7 +922,7 @@ class MacroModelMD(_MacroModel):
             Cannot be more than ``99999.99``.
 
         eq_time : :class:`float`, optional
-            The equilibriation time in ``ps`` before the MD is run.
+            The equilibration time in ``ps`` before the MD is run.
             Cannot be more than ``999999.99``.
 
         maximum_iterations : :class:`int`, optional
@@ -1049,7 +1063,7 @@ class MacroModelMD(_MacroModel):
             Cannot be more than ``99999.99``.
 
         eq_time : :class:`float`
-            The equilibriation time in ``ps`` before the MD is run.
+            The equilibration time in ``ps`` before the MD is run.
             Cannot be more than ``999999.99``.
 
         minimum_gradient : :class:`float`
@@ -1240,7 +1254,7 @@ class MacroModelMD(_MacroModel):
 
         # Go through all the bonds in the rdkit molecule. If the bond
         # is not between bonder atoms add a fix line to the
-        # ``fix_block``. If the bond does invovle two bonder atoms go
+        # ``fix_block``. If the bond does involve two bonder atoms go
         # to the next bond. This is because a bond between 2 bonder
         # atoms was added during construction and should therefore not
         # be fixed.
