@@ -171,7 +171,8 @@ class Reactor:
         _ReactionKey('nitrile', 'aldehyde'): 2,
         _ReactionKey('amide', 'amine'): 2,
         _ReactionKey('terminal_alkene', 'terminal_alkene'): 2,
-        _ReactionKey('alkyne2', 'alkyne2'): 3
+        _ReactionKey('alkyne2', 'alkyne2'): 3,
+        _ReactionKey('primary_amine', 'aldehyde'): 2,
     }
 
     def __init__(self, mol):
@@ -327,7 +328,7 @@ class Reactor:
         self._remove_deleters(func_groups)
 
         fg1, fg2 = func_groups
-        bond_order = self._bond_orders.get(reaction_key, 1)
+        bond_order = self._bond_orders.get(reaction_key)
         bond = Bond(
             atom1=fg1.bonders[0],
             atom2=fg2.bonders[0],
