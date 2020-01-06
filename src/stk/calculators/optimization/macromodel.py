@@ -44,6 +44,10 @@ class MacroModelInputError(Exception):
     ...
 
 
+class MacroModelLicenseCheckoutError(Exception):
+    ...
+
+
 class _MacroModel(_MoleculeCalculator, Optimizer):
     """
     Base class for MacroModel optimzers.
@@ -201,6 +205,14 @@ class _MacroModel(_MoleculeCalculator, Optimizer):
             if error3 in log_content and error4 in log_content:
                 raise MacroModelLewisStructureError(
                     'bmin failed due to poor Lewis structure.'
+                )
+            error5 = (
+                'FATAL mmlic3: -4: Licensed number of '
+                'users already reached.'
+            )
+            if error5 in log_content:
+                raise MacroModelLicenseCheckoutError(
+                    'Could not checkout license for optimisation.'
                 )
 
             if 'MDYN error encountered' in log_content:
