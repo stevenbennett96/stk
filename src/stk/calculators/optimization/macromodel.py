@@ -63,7 +63,7 @@ class _MacroModel(_MoleculeCalculator, Optimizer):
         maximum_iterations,
         minimum_gradient,
         use_cache,
-        dump=False,
+        dump,
     ):
         """
         Initialize a :class:`_MacroModel` instance.
@@ -100,6 +100,9 @@ class _MacroModel(_MoleculeCalculator, Optimizer):
             If ``True`` :meth:`optimize` will not run twice on the same
             molecule.
 
+        dump : :class:`bool`
+            If ``True`` :meth:`optimize` will dump a JSON for the
+            molecule.
         """
 
         self._macromodel_path = macromodel_path
@@ -108,6 +111,7 @@ class _MacroModel(_MoleculeCalculator, Optimizer):
         self._force_field = force_field
         self._maximum_iterations = maximum_iterations
         self._minimum_gradient = minimum_gradient
+        self._dump = dump
         super().__init__(use_cache=use_cache)
 
     def _run_bmin(self, mol, run_name):
@@ -546,7 +550,8 @@ class MacroModelForceField(_MacroModel):
         force_field=16,
         maximum_iterations=2500,
         minimum_gradient=0.05,
-        use_cache=False
+        use_cache=False,
+        dump=False,
     ):
         """
         Initialize a :class:`MacroModelForceField` object.
@@ -588,6 +593,9 @@ class MacroModelForceField(_MacroModel):
             If ``True`` :meth:`optimize` will not run twice on the same
             molecule.
 
+        dump : :class:`bool`
+            If ``True`` :meth:`optimize` will dump a JSON for the
+            molecule.
         """
         self._check_params(
             minimum_gradient=minimum_gradient,
@@ -601,7 +609,8 @@ class MacroModelForceField(_MacroModel):
             maximum_iterations=maximum_iterations,
             minimum_gradient=minimum_gradient,
             timeout=timeout,
-            use_cache=use_cache
+            use_cache=use_cache,
+            dump=dump,
         )
 
     @staticmethod
@@ -739,7 +748,7 @@ class MacroModelForceField(_MacroModel):
         # First write a .mol file of the molecule.
         mol.write(mol_path)
         # Dump a JSON file prior to optimization.
-        if self.dump:
+        if self._dump:
             json_path = f'{run_name}_UNOPT.json'
             mol.dump(json_path)
         # MacroModel requires a ``.mae`` file as input.
@@ -752,7 +761,7 @@ class MacroModelForceField(_MacroModel):
         self._convert_maegz_to_mae(run_name)
         mol.update_from_file(mae_path)
         # Dump after optimizing.
-        if self.dump:
+        if self._dump:
             json_path = f'{run_name}_OPT.json'
             mol.dump(json_path)
         move_generated_macromodel_files(run_name, output_dir)
@@ -902,7 +911,8 @@ class MacroModelMD(_MacroModel):
         restricted_bonds=None,
         restricted_bond_angles=None,
         restricted_torsional_angles=None,
-        use_cache=False
+        use_cache=False,
+        dump=False,
     ):
         """
         Initialize a :class:`.MacroModelMD` instance.
@@ -1002,6 +1012,9 @@ class MacroModelMD(_MacroModel):
             If ``True`` :meth:`optimize` will not run twice on the same
             molecule.
 
+        dump : :class:`bool`
+            If ``True`` :meth:`optimize` will dump a JSON for the
+            molecule.
         """
 
         if restricted_bonds is None:
@@ -1049,7 +1062,8 @@ class MacroModelMD(_MacroModel):
             force_field=force_field,
             maximum_iterations=maximum_iterations,
             minimum_gradient=minimum_gradient,
-            use_cache=use_cache
+            use_cache=use_cache,
+            dump=dump,
         )
 
     @staticmethod
@@ -1185,7 +1199,9 @@ class MacroModelMD(_MacroModel):
         line9 = ('BGIN', 0, 0, 0, 0, 0, 0, 0, 0)
         line10 = ('READ', -2, 0, 0, 0, 0, 0, 0, 0)
         line11 = ('CONV', 2, 0, 0, 0, self._minimum_gradient, 0, 0, 0)
-        line12 = ('MINI', 1, 0, self._maximum_iterations, 0, 0, 0, 0, 0)
+        line12 = (
+            'MINI', 1, 0, self._maximum_iterations, 0, 0, 0, 0, 0
+        )
         line13 = ('END', 0, 1, 0, 0, 0, 0, 0, 0)
 
         com_block = "\n".join([
@@ -1242,6 +1258,10 @@ class MacroModelMD(_MacroModel):
 
         # First write a .mol file of the molecule.
         mol.write(mol_path)
+        # Dump a JSON file prior to optimization.
+        if self._dump:
+            json_path = f'{run_name}_UNOPT.json'
+            mol.dump(json_path)
         # MacroModel requires a ``.mae`` file as input.
         self._run_structconvert(mol_path, f'{run_name}.mae')
         # Generate the ``.com`` file for the MacroModel MD run.
@@ -1251,6 +1271,10 @@ class MacroModelMD(_MacroModel):
         # Extract the lowest energy conformer into its own .mae file.
         conformer_mae = MAEExtractor(run_name).path
         mol.update_from_file(conformer_mae)
+        # Dump after optimizing.
+        if self._dump:
+            json_path = f'{run_name}_OPT.json'
+            mol.dump(json_path)
 
         move_generated_macromodel_files(run_name, output_dir)
 
