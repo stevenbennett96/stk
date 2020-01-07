@@ -58,7 +58,8 @@ class _MacroModel(_MoleculeCalculator, Optimizer):
         force_field,
         maximum_iterations,
         minimum_gradient,
-        use_cache
+        use_cache,
+        dump=False,
     ):
         """
         Initialize a :class:`_MacroModel` instance.
@@ -725,15 +726,23 @@ class MacroModelForceField(_MacroModel):
         mae_path = f'{run_name}.mae'
         # First write a .mol file of the molecule.
         mol.write(mol_path)
+        # Dump a JSON file prior to optimization.
+        if self.dump:
+            json_path = f'{run_name}_UNOPT.json'
+            mol.dump(json_path)
         # MacroModel requires a ``.mae`` file as input.
         self._run_structconvert(mol_path, mae_path)
-        # generate the ``.com`` file for the MacroModel run.
+        # Generate the ``.com`` file for the MacroModel run.
         self._generate_com(mol, run_name)
         # Run the optimization.
         self._run_bmin(mol, run_name)
         # Get the ``.maegz`` optimization output to a ``.mae``.
         self._convert_maegz_to_mae(run_name)
         mol.update_from_file(mae_path)
+        # Dump after optimizing.
+        if self.dump:
+            json_path = f'{run_name}_OPT.json'
+            mol.dump(json_path)
         move_generated_macromodel_files(run_name, output_dir)
 
     def _fix_distances(self, mol, fix_block):
