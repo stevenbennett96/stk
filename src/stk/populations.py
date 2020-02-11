@@ -16,6 +16,7 @@ import psutil
 from functools import wraps
 import logging
 import pathos
+import random
 
 from .utilities import dedupe, dice_similarity
 from .molecular import ConstructedMolecule, Molecule
@@ -731,6 +732,47 @@ class Population:
                 topology_graph=top,
                 use_cache=use_cache
             )
+            if mol not in pop:
+                pop.direct_members.append(mol)
+
+            if len(pop) == size:
+                break
+
+        assert len(pop) == size
+        return pop
+
+    @classmethod
+    def init_random_without_replacement(
+        cls,
+        building_blocks,
+        topology_graphs,
+        size,
+        random_seed=None,
+        use_cache=False,
+    ):
+
+        pop = cls()
+        generator = np.random.RandomState(random_seed)
+
+        # Shuffle the sublists.
+        for db in building_blocks:
+            generator.shuffle(db)
+
+        for *bbs in list(random.sample(
+            list(zip(*building_blocks)),
+            k=size,
+        )):
+            # Get random topology from list of topologies.
+            top = random.choice(topology_graphs)
+            # Generate the randomly constructed molecule,
+            # with random topology.
+            mol = ConstructedMolecule(
+                building_blocks=bbs,
+                topology_graph=top,
+                use_cache=use_cache,
+            )
+            # Ensure molecule has not already been added to
+            # population.
             if mol not in pop:
                 pop.direct_members.append(mol)
 
