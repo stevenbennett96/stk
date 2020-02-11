@@ -121,6 +121,47 @@ def test_init_random():
         assert len(aldehydes) == 1
 
 
+def test_init_random_without_replacement():
+    amines = [
+        stk.BuildingBlock('NCCCN', ['amine'], use_cache=True),
+        stk.BuildingBlock('NCCCCCN', ['amine'],  use_cache=True),
+        stk.BuildingBlock('NCCOCCN', ['amine'],  use_cache=True),
+    ]
+    aldehydes = [
+        stk.BuildingBlock('O=CCC(C=O)CC=O', ['aldehyde'], use_cache=True),
+        stk.BuildingBlock('O=CCC(C=O)CC=O', ['aldehyde'], use_cache=True),
+        stk.BuildingBlock('O=CC(C=O)COCC=O', ['aldehyde'], use_cache=True),
+    ]
+    # Only three possible cages can be formed
+    # using this function.
+    cages = stk.Population.init_random(
+        building_blocks=[amines, aldehydes],
+        topology_graphs=[stk.cage.FourPlusSix()],
+        size=2,
+        use_cache=True,
+    )
+    assert len(cages) == 2
+    assert len(cages.direct_members) == 2
+    assert len(cages.subpopulations) == 0
+    # If cache is switched on, cages should all be unique.
+    assert len(set(cages)) == 2
+
+    for cage in cages:
+        bbs = tuple(cage.get_building_blocks())
+        amines = tuple(
+            bb for bb in bbs
+            if bb.func_groups[0].fg_type.name == 'amine'
+        )
+        aldehydes = tuple(
+            bb for bb in bbs
+            if bb.func_groups[0].fg_type.name == 'aldehyde'
+        )
+        # If cache is switched on, the building blocks
+        # of molecules should be unique.
+        assert len(set(amines)) == len(amines)
+        assert len(set(aldehydes)) == len(aldehydes)
+
+
 def test_init_diverse():
     amines = [
         stk.BuildingBlock('NCCCN', ['amine']),
