@@ -94,7 +94,7 @@ def test_init_random_with_replacement():
     ]
     # Only three possible cages can be formed
     # using this function.
-    cages = stk.Population.init_random(
+    cages = stk.Population.init_random_with_replacement(
         building_blocks=[amines, aldehydes],
         topology_graphs=[stk.cage.FourPlusSix()],
         size=2,
@@ -135,7 +135,7 @@ def test_init_random_without_replacement():
     ]
     # Only three possible cages can be formed
     # using this function.
-    cages = stk.Population.init_random(
+    cages = stk.Population.init_random_without_replacement(
         building_blocks=[amines, aldehydes],
         topology_graphs=[stk.cage.FourPlusSix()],
         size=2,

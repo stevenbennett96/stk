@@ -557,7 +557,7 @@ class Population:
         )
         assert len(unique_combinations) >= size
         # Select randomly until desired size reached.
-        for *bbs, top in generator.choice(unique_combinations):
+        for *bbs, top in generator.sample(unique_combinations, k=size):
             # Generate the random constructed molecule.
             mol = ConstructedMolecule(
                 building_blocks=bbs,
@@ -566,9 +566,6 @@ class Population:
             )
             if mol not in pop:
                 pop.direct_members.append(mol)
-
-            if len(pop) == size:
-                break
 
             # Get the most different BuildingBlock to the previously
             # selected one, per sublist.
@@ -731,7 +728,7 @@ class Population:
         # Unique combinations of all precursors.
         unique_combinations = set(it.product(*building_blocks))
         assert len(unique_combinations) >= size
-        for bbs in generator.choice(unique_combinations):
+        for bbs in generator.sample(unique_combinations, k=size):
             top = generator.choice(topology_graphs)
             # Generate the randomly constructed molecule,
             # with random topology.
@@ -834,7 +831,7 @@ class Population:
         # Ensure the possible combinations is less than
         # the desired population.
         assert len(combinations) >= size
-        for bbs in generator.choice(combinations):
+        for bbs in generator.sample(combinations, k=size):
             # Get random topology from list of topologies.
             top = generator.choice(topology_graphs)
             # Generate the randomly constructed molecule,
