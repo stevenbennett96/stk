@@ -10,7 +10,6 @@ operations on groups of ``stk`` molecules, often in parallel.
 import itertools as it
 import os
 from os.path import join
-import numpy as np
 import json
 import psutil
 from functools import wraps
