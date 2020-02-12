@@ -758,10 +758,8 @@ class Population:
         for db in building_blocks:
             generator.shuffle(db)
 
-        for bbs in random.sample(
-            list(zip(*building_blocks)),
-            k=size,
-        ):
+        combinations = list(zip(*building_blocks))
+        for bbs in random.sample(combinations, k=size):
             # Get random topology from list of topologies.
             top = random.choice(topology_graphs)
             # Generate the randomly constructed molecule,
