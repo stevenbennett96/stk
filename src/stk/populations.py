@@ -425,7 +425,8 @@ class Population:
         `building_blocks`. Once the first construction is complete,
         the next :class:`.Molecule` selected from each sublist is the
         one with the most different Morgan fingerprint to the prior
-        one. The third construction uses randomly selected
+        one, calculated using Dice similarity methods.
+        The third construction uses randomly selected
         :class:`.Molecule` objects again and so on. This is done until
         `size` :class:`.ConstructedMolecule` instances have been
         constructed.
@@ -545,13 +546,17 @@ class Population:
         pop = cls()
 
         # Shuffle the sublists.
-        generator = np.random.RandomState(random_seed)
-        for db in building_blocks:
-            generator.shuffle(db)
+        generator = random.seed(random_seed)
 
-        # Go through every possible constructed molecule.
-        for *bbs, top in it.product(*building_blocks, topology_graphs):
-
+        # Get all unique combinations of molecules.
+        unique_combinations = set(
+            it.product(
+                *building_blocks,
+                topology_graphs
+            )
+        )
+        # Iterate randomly through all unique combinations.
+        for *bbs, top in generator.choice(unique_combinations, k=size):
             # Generate the random constructed molecule.
             mol = ConstructedMolecule(
                 building_blocks=bbs,
@@ -569,7 +574,6 @@ class Population:
             diff_bbs = [
                 min(db, key=lambda mol: dice_similarity(bb, mol))
                 for bb, db in zip(bbs, building_blocks)
-
             ]
             mol = ConstructedMolecule(
                 building_blocks=diff_bbs,
@@ -586,21 +590,25 @@ class Population:
         return pop
 
     @classmethod
-    def init_random(
+    def init_random_with_replacement(
         cls,
         building_blocks,
         topology_graphs,
         size,
         random_seed=None,
-        use_cache=False
+        use_cache=False,
     ):
         """
         Construct molecules for a random :class:`.Population`.
 
         All molecules are held in :attr:`direct_members`.
 
-        From the supplied building blocks a random :class:`.Molecule`
-        is selected from each sublist to form a
+        From the supplied building blocks, two random
+        :class:`.BuildingBlock` objects are chosen from all possible
+        combinations of :class:`.BuildingBlock` objects. This is
+        identical to sampling all provided building blocks, with
+        replacement.
+
         :class:`.ConstructedMolecule`. This is done until `size`
         :class:`.ConstructedMolecule` objects have been constructed.
 
@@ -638,7 +646,7 @@ class Population:
             .. code-block:: python
 
                 # mol is a new ConstructedMolecule. bb1 is selected
-                # from bbs1, bb2 is selected from bbs2 and bb3 is
+                # from bbs1, bb2 is selected from bbs2 and bb3 is__c
                 # selected from bbs3.
                 mol = stk.ConstructedMolecule(
                     building_blocks=[bb1, bb2, bb3],
@@ -647,9 +655,7 @@ class Population:
 
             The order a :class:`.Molecule` instance is given to
             the :class:`.ConstructedMolecule` is determined by the
-            sublist of `building_blocks` it was picked from. Note that
-            the number of sublists in `building_blocks` is not fixed.
-            It merely has to be compatible with the `topology_graphs`.
+            sublist of `building_blocks` it was picked from.
 
         topology_graphs : :class:`iterable` of :class:`.TopologyGraph`
             An :class:`iterable` holding topology graphs which should
@@ -718,43 +724,27 @@ class Population:
         """
 
         pop = cls()
-        generator = np.random.RandomState(random_seed)
+        generator = random.seed(random_seed)
 
-        # Shuffle the sublists.
-        for db in building_blocks:
-            generator.shuffle(db)
-
-        # Go through every possible constructed molecule.
-        for *bbs, top in it.product(*building_blocks, topology_graphs):
-            # Generate the random constructed molecule.
+        # Unique combinations of all precursors.
+        unique_combinations = set(it.product(*building_blocks))
+        assert len(unique_combinations) >= size
+        for bbs in generator.sample(unique_combinations, k=size):
+            top = generator.choice(topology_graphs)
+            # Generate the randomly constructed molecule,
+            # with random topology.
             mol = ConstructedMolecule(
                 building_blocks=bbs,
                 topology_graph=top,
-                use_cache=use_cache
+                use_cache=use_cache,
             )
+            # Ensure molecule has not already been added to
+            # population.
             if mol not in pop:
                 pop.direct_members.append(mol)
 
-            if len(pop) == size:
-                break
-
         assert len(pop) == size
         return pop
-
-    @classmethod
-    def init_random_with_replacement(
-        cls,
-        building_blocks,
-        topology_graphs,
-        size,
-        random_seed=None,
-        use_cache=False,
-    ):
-
-        pop = cls()
-        generator = random.seed(random_seed)
-
-        
 
     @classmethod
     def init_random_without_replacement(
@@ -765,6 +755,66 @@ class Population:
         random_seed=None,
         use_cache=False,
     ):
+        """
+        Construct molecules for a random :class:`.Population`.
+
+        All molecules are held in :attr:`direct_members`.
+
+        From the supplied building blocks, a random combination is
+        chosen from each :class:`list` of :class:`.BuildingBlock`.
+        Note: The number of combinations is limited by the length of
+        the smallest list of building blocks. From these unique lists,
+        :class:`.ConstructedMolecule` objects are selected until the
+        desired population number is selected.
+        This is done until `size` :class:`.ConstructedMolecule`
+        objects have been constructed.
+
+        Parameters
+        ----------
+        building_blocks : :class:`list` of :class:`.Molecule`
+            A :class:`list` holding nested building blocks, for
+            example
+
+            .. code-block:: python
+
+                bbs1 = [
+                    stk.BuildingBlock(...),
+                    sk.BuildingBlock(...),
+                    ...
+                ]
+                bbs2 = [
+                    stk.ConstructedMolecule(...),
+                    stk.BuildingBlock(...),
+                    ...
+                ]
+                bbs3 = [
+                    stk.BuildingBlock(...),
+                    stk.BuildingBlock(...),
+                    ...
+                ]
+                building_blocks = [bbs1, bbs2, bbs3]
+
+        topology_graphs : :class:`iterable` of :class:`.TopologyGraph`
+            An :class:`iterable` holding topology graphs which should
+            be randomly selected during initialization of
+            :class:`.ConstructedMolecule`.
+
+        size : :class:`int`
+            The size of the population to be initialized.
+
+        random_seed : :class:`int`, optional
+            Seed for the random number generator to get replicable
+            results.
+
+        use_cache : :class:`bool`, optional
+            Toggles use of the molecular cache.
+
+        Returns
+        -------
+        :class:`.Population`
+            A population filled with random
+            :class:`.ConstructedMolecule` instances.
+        """
 
         pop = cls()
         generator = random.seed(random_seed)
@@ -773,7 +823,11 @@ class Population:
         for db in building_blocks:
             generator.shuffle(db)
 
+        # A list of all building blocks without replacement.
         combinations = list(zip(*building_blocks))
+        # Ensure the possible combinations is less than
+        # the desired population.
+        assert len(combinations) >= size
         for bbs in generator.sample(combinations, k=size):
             # Get random topology from list of topologies.
             top = generator.choice(topology_graphs)
@@ -786,7 +840,8 @@ class Population:
             )
             # Ensure molecule has not already been added to
             # population.
-            pop.direct_members.append(mol)
+            if mol not in pop:
+                pop.direct_members.append(mol)
 
         assert len(pop) == size
         return pop
