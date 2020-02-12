@@ -742,6 +742,21 @@ class Population:
         return pop
 
     @classmethod
+    def init_random_with_replacement(
+        cls,
+        building_blocks,
+        topology_graphs,
+        size,
+        random_seed=None,
+        use_cache=False,
+    ):
+
+        pop = cls()
+        generator = random.seed(random_seed)
+
+        
+
+    @classmethod
     def init_random_without_replacement(
         cls,
         building_blocks,
@@ -752,16 +767,16 @@ class Population:
     ):
 
         pop = cls()
-        generator = np.random.RandomState(random_seed)
+        generator = random.seed(random_seed)
 
         # Shuffle the sublists.
         for db in building_blocks:
             generator.shuffle(db)
 
         combinations = list(zip(*building_blocks))
-        for bbs in random.sample(combinations, k=size):
+        for bbs in generator.sample(combinations, k=size):
             # Get random topology from list of topologies.
-            top = random.choice(topology_graphs)
+            top = generator.choice(topology_graphs)
             # Generate the randomly constructed molecule,
             # with random topology.
             mol = ConstructedMolecule(
@@ -771,11 +786,7 @@ class Population:
             )
             # Ensure molecule has not already been added to
             # population.
-            if mol not in pop:
-                pop.direct_members.append(mol)
-
-            if len(pop) == size:
-                break
+            pop.direct_members.append(mol)
 
         assert len(pop) == size
         return pop
