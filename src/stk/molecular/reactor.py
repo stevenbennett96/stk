@@ -173,6 +173,7 @@ class Reactor:
         _ReactionKey('terminal_alkene', 'terminal_alkene'): 2,
         _ReactionKey('alkyne2', 'alkyne2'): 3,
         _ReactionKey('primary_amine', 'aldehyde'): 2,
+        _ReactionKey('bromine', 'bromine'): 1,
     }
 
     def __init__(self, mol):
