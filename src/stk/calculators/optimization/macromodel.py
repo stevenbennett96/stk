@@ -212,10 +212,12 @@ class _MacroModel(_MoleculeCalculator, Optimizer):
                     'bmin failed due to poor Lewis structure.'
                 )
             error5 = (
-                'FATAL mmlic3: -4: Licensed number of '
-                'users already reached.'
+                '-4: Licensed number of users already reached.'
             )
-            if error5 in log_content:
+            error_6 = (
+                'BatchMin Error'
+            )
+            if error5 in log_content and error_6 in log_content:
                 raise MacroModelLicenseCheckoutError(
                     'Could not checkout license for optimisation.'
                 )
