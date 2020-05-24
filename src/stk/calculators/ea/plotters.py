@@ -435,7 +435,7 @@ class SelectionPlotter(Plotter):
             hue='heat_map',
             palette='magma_r',
             data=df,
-            s=[200 for i in range(len(counter.keys()))]
+            s=200,
         )
         ax.get_legend().remove()
         ax.figure.colorbar(sm).set_label(self._heat_map_label)
