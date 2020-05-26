@@ -553,7 +553,7 @@ class Population:
 
         # Get all unique combinations of molecules.
         unique_combinations = list(
-                dict.fromkeys(
+            dict.fromkeys(
                 it.product(
                     *building_blocks,
                     topology_graphs
