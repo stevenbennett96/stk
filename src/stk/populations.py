@@ -552,10 +552,12 @@ class Population:
         generator = random.Random(random_seed)
 
         # Get all unique combinations of molecules.
-        unique_combinations = set(
-            it.product(
-                *building_blocks,
-                topology_graphs
+        unique_combinations = list(
+                dict.fromkeys(
+                it.product(
+                    *building_blocks,
+                    topology_graphs
+                )
             )
         )
         assert len(unique_combinations) >= size
@@ -729,7 +731,7 @@ class Population:
         generator = random.Random(random_seed)
 
         # Unique combinations of all precursors.
-        unique_combinations = set(it.product(*building_blocks))
+        unique_combinations = list(dict.fromkeys(it.product(*building_blocks)))
         assert len(unique_combinations) >= size
         for bbs in generator.sample(unique_combinations, k=size):
             top = generator.choice(topology_graphs)
