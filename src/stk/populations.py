@@ -587,7 +587,7 @@ class Population:
             if len(pop) == size:
                 break
 
-        assert len(pop) == size
+        assert len(pop) >= size
         return pop
 
     @classmethod

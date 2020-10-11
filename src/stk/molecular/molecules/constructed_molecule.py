@@ -430,7 +430,7 @@ class ConstructedMolecule(Molecule):
             bb_index[bb] = i
             bb_counter.append(self.building_block_counter[bb])
             building_blocks.append(bb.to_dict(include_attrs, True))
-            building_block_vertices[i] = [
+            building_block_vertices[str(i)] = [
                 self.topology_graph.vertices.index(v)
                 for v in self.building_block_vertices[bb]
             ]
